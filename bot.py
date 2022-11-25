@@ -1,12 +1,11 @@
 
 import os   #This module provides a portable way of using operating system dependent functionality
 
-import textwrap
-
 import discord
+
 from dotenv import load_dotenv
 
-import Interactive
+import Interactive, Functions
 
 
 
@@ -15,21 +14,21 @@ load_dotenv()  # take environment variables from .env.
 #Apriamo il file e prendiamo il il token
 TOKEN = os.getenv("DISCORD_TOKEN")
 GUILD = os.getenv('DISCORD_GUILD')
-PRIVILEGIATO = os.getenv('PRIVILEGIATO')
+BOT_TAG = os.getenv('BOT_TAG')
 
 
 #Nuovo oggetto
 #The client is the object that represetns our connection to Discord.
 #A Client handles events, tracks state, and generally interacts with Discord APIs
-client = discord.Client()
+bot = discord.Client()
 
 
 #decorator
-@client.event
+@bot.event
 async def on_ready():
 
     #cercando il server
-    guild = discord.utils.get(client.guilds, name=GUILD)
+    guild = discord.utils.get(bot.guilds, name=GUILD)
 
     '''
     #lamba è una funzione anonima
@@ -40,7 +39,7 @@ async def on_ready():
     '''
 
     print(
-        f'{client.user} is connected to the following guild:\n'
+        f'{bot.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})'
     )
 
@@ -51,7 +50,7 @@ async def on_ready():
     #usiamo una f-string (sono più balorde di quelle normali)
     print(f'Guild Members:\n - {members}')
 
-@client.event
+@bot.event
 async def on_message(message):
     #Guardiamo chi ha mandato il messaggio
     writer = message.author
@@ -59,26 +58,25 @@ async def on_message(message):
 
 
     #Se il bot non è menzionato il message.content sarà vuoto
-    if(message.content != ""):
+    if((message.content != "") and (writer != bot.user)):
 
+        #Salvo il messaggio
         Text = message.content
-        #cerchiamo il primo spazio
-        index = Text.index(" ")
-        Text = Text[index+1:]
 
-        if(Interactive.Awaiting_Input):
-            await Interactive.Ex_Command(Text, message.channel)
+        # Puliamo il messaggio dal tag
+        Text = Functions.Clean_Command(Text, BOT_TAG)
 
 
-        elif(Text.split()[0] == "run:"):
+        #await Functions.chat_print(message.channel, "Voglio la pizza")
 
-            #print("ciao")
-            index = Text.index("run: ") + len("run: ")
-            Text = Text[index:]
+        await Functions.interactive_run(message.channel, bot, Text)
+
+        if(Text.split()[0] == "run:"):
+
+            #Puliamo il messaggio dal commando
+            Text = Functions.Clean_Command(Text, "run:")
 
             await Interactive.run_code(Text, message.channel)
-
-
 
 
 
@@ -87,4 +85,4 @@ async def on_message(message):
 
 
 
-client.run(TOKEN)
+bot.run(TOKEN)
