@@ -24,13 +24,40 @@ def retrieve_var_name(var, local_variables):
     return name
 
 
-async def chat_print(channel, string):
+async def retrieve_code_from_file(file):
+
+
+
+    File_bytes = await file.read()
+
+
+    #Trasformiamo l'oggetto Byte in una stringa di Python3 (gli oggetti byte iniziano con la b)
+    code = File_bytes.decode()
+
+
+
+    return code
+
+async def chat_print(channel, *arg):
+
+    #Trasfromiamo tutti gli argomenti in un'unica stringa
+    string = ""
+    for i in range(len(arg)):
+        string += str(arg[i])
+
     await channel.send("> **>>>** " + string)
 
     return
 
-async def chat_input(channel, client, string):
 
+async def chat_input(channel, client, *arg):
+
+    # Trasfromiamo tutti gli argomenti in un'unica stringa
+    string = ""
+    for i in range(len(arg)):
+        string += str(arg[i])
+
+    #Inviamo la stringa/stringhe inserite
     await channel.send("> **>>>** " + string)
 
     #Creiamo un check per assicurarci che il prossimo messaggio sia nello stesso canale
@@ -45,9 +72,10 @@ async def chat_input(channel, client, string):
     index = new_input.index(" ")
     new_input = new_input[index + 1:]
 
-    await channel.send("> **<<<** " + new_input)
+    await channel.send("> **<<<** " + str(new_input))
 
     return new_input
+
 
 
 def interactive_command_replace(code, channel, client):
@@ -61,9 +89,14 @@ def interactive_command_replace(code, channel, client):
     new_code = new_code.replace("input(", "await chat_input(" + retrieve_var_name(channel, locals()) + "," +
                             retrieve_var_name(client, locals()) + ",")
 
+    #se vi dovessero essere delle definizioni di funzione siamo sicuri queste siano asincrone
+    #new_code = new_code.replace("def", "async def").
+
+
     return new_code
 
-async def interactive_run(channel, client, code):
+
+async def interactive_execute(channel, client, code):
 
 
     '''
@@ -82,10 +115,14 @@ async def interactive_run(channel, client, code):
     #Aggiungiamo il prefisso in modo tale che il programma sia svolto come una funzione asincrona e indentiamo tutto il resto del programma
     interactive_code = interactive_code + textwrap.indent(code, '  ')
 
+    #dedentiamo il codice
     interactive_code = textwrap.dedent(interactive_code)
 
+    #eseguiamo il codice che definirà una nuova funzione
     exec(interactive_code, globals())
+    #chiamiamo la funzione
     await executing(channel, client, code)
 
 
     return
+

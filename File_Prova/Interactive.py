@@ -1,11 +1,6 @@
-
-import discord
-
 import textwrap
 
 
-#Non so perchè ma altrimenti non mi legge la flag
-import Interactive
 
 
 #Variabile per salvare il vecchio codice in caso si stia aspettando un nuovo input
@@ -15,7 +10,7 @@ Awaiting_Input = False
 
 
 
-async def Ex_Command(new_input, channel):
+'''sync def Ex_Command(new_input, channel):
 
 
     #Controlliamo se stiamo già aspettando un input
@@ -59,7 +54,7 @@ async def Ex_Command(new_input, channel):
         Interactive.Awaiting_Input = False
         await channel.send("> **<<<**  '" + new_input + "'")
 
-    return
+    return'''
 
 
 async def run_code(code, channel):

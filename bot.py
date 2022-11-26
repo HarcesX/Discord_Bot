@@ -5,9 +5,7 @@ import discord
 
 from dotenv import load_dotenv
 
-import Interactive, Functions
-
-
+import Functions, Games.Tris, Math.Math as Math
 
 load_dotenv()  # take environment variables from .env.
 
@@ -67,17 +65,57 @@ async def on_message(message):
         Text = Functions.Clean_Command(Text, BOT_TAG)
 
 
-        #await Functions.chat_print(message.channel, "Voglio la pizza")
 
-        await Functions.interactive_run(message.channel, bot, Text)
+        if (Text.split()[0] == "graph:"):
 
-        if(Text.split()[0] == "run:"):
 
-            #Puliamo il messaggio dal commando
-            Text = Functions.Clean_Command(Text, "run:")
+            file_name = await Math.graph("y = x * 4", -50, 150.0, 400)
 
-            await Interactive.run_code(Text, message.channel)
+            file_name = discord.File(file_name)
 
+            await message.channel.send(file=file_name , content="Ecco il grafico")
+
+
+
+        if (Text.split()[0] == "graph_sen:"):
+
+
+            file_name = await Math.graph_sen()
+
+            file_name = discord.File(file_name)
+
+            await message.channel.send(file=file_name , content="Ecco il grafico")
+
+
+
+        if (Text.split()[0] == "interactive_execute:"):
+            # Puliamo il messaggio dal commando
+            Text = Functions.Clean_Command(Text, "interactive_execute:")
+
+            print(Text)
+
+            await Functions.interactive_execute(message.channel, bot, Text)
+
+
+
+        if (Text.split()[0] == "interactive_run:"):
+
+            #se vi sono attachments
+            if(message.attachments):
+
+                code = await Functions.retrieve_code_from_file(message.attachments[0])
+
+                print(code)
+
+                await Functions.interactive_execute(message.channel, bot, code)
+
+        if (Text.split()[0] == "play_tris:"):
+
+            with open(r'U:\Programma Zioneee\Python\DiscordBot Test1\Games\Tris.py', "r") as file:
+                code = file.read()
+                file.close()
+
+            await Functions.interactive_execute(message.channel, bot, code)
 
 
 
